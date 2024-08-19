@@ -34,9 +34,10 @@ jobs:
           role-to-assume: ${{ secrets.GHA_ASSUMED_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Sts GetCallerIdentity
-        run: |
-          aws sts get-caller-identity
+# This was an intermediate step to check if identity policy works
+#      - name: Sts GetCallerIdentity
+#        run: |
+#          aws sts get-caller-identity
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -53,6 +54,13 @@ jobs:
 #          tags:
 #            - ${{ECR_REGISTRY}}/${ECR_REPOSITORY}-${GITHUB_SHA}
 
+# TODO
+#   Create the image with two tags: one must be associated with github sha
+#   The other one will be "latest" - the one that is use in production
+#   Every time when new "latest" is pushed the previous one detached from "latest" tag,
+#   but keep the "sha" one
+
+# This is temporary workaround until I figure out what I need, then move to the docker/setup-buildx-action@v3
       - id: build-and-push
         name: push image to Amazon ECR
         shell: bash
