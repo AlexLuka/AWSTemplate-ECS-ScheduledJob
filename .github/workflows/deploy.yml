@@ -46,13 +46,14 @@ jobs:
 #      - id: build
 #        uses: docker/setup-buildx-action@v3
 #        env:
-#          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+#          ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
 #          ECR_REPOSITORY: ${{ env.ECR_REPO_NAME }}
+#          IMAGE_TAG: today-${{ github.sha }}
 #        with:
 #          context: .
 #          build-args: ${GITHUB_SHA}
 #          tags:
-#            - ${{ECR_REGISTRY}}/${ECR_REPOSITORY}-${GITHUB_SHA}
+#            - ${{ ECR_REGISTRY }}/${{ ECR_REPOSITORY }}:${{ IMAGE_TAG }}
 
 # TODO
 #   Create the image with two tags: one must be associated with github sha
@@ -65,12 +66,17 @@ jobs:
         name: push image to Amazon ECR
         shell: bash
         env:
-          ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
-          ECR_REPOSITORY: ${{ env.ECR_REPO_NAME }}
-          IMAGE_TAG: today-${{ github.sha }}
+#          ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+#          ECR_REPOSITORY: ${{ env.ECR_REPO_NAME }}
+          IMAGE_NAME: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ env.ECR_REPO_NAME }}
+          IMAGE_TAG1: ${{ github.sha }}
+          IMAGE_TAG2: latest
         run: |
-          docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" --build-arg GITHUB_SHA_ARG=$GITHUB_SHA .
-          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          echo "IMAGE $IMAGE_TAG is pushed to $ECR_REGISTRY/$ECR_REPOSITORY"
-          echo "image_tag=$IMAGE_TAG" 
-          echo "full_image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker build -t "$IMAGE_NAME:$IMAGE_TAG1" --build-arg GITHUB_SHA_ARG=$GITHUB_SHA .
+          docker push "$IMAGE_NAME:$IMAGE_TAG1"
+          echo "IMAGE $IMAGE_TAG1 is pushed to $IMAGE_NAME"
+          echo "image_tag=$IMAGE_TAG1"
+          echo "full_image=$IMAGE_NAME:$IMAGE_TAG1"
+          docker tag "$IMAGE_NAME:$IMAGE_TAG1" "$IMAGE_NAME:$IMAGE_TAG2"
+          docker push "$IMAGE_NAME:$IMAGE_TAG2"
+          echo "The Latest image pushed to the repository as well"
