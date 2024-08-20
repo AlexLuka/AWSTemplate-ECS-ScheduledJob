@@ -34,49 +34,23 @@ jobs:
           role-to-assume: ${{ secrets.GHA_ASSUMED_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
-# This was an intermediate step to check if identity policy works
-#      - name: Sts GetCallerIdentity
-#        run: |
-#          aws sts get-caller-identity
-
-      - name: Login to Amazon ECR
-        id: login-ecr
+      - id: login-ecr
+        name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
 
-#      - id: build
-#        uses: docker/setup-buildx-action@v3
-#        env:
-#          ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
-#          ECR_REPOSITORY: ${{ env.ECR_REPO_NAME }}
-#          IMAGE_TAG: today-${{ github.sha }}
-#        with:
-#          context: .
-#          build-args: ${GITHUB_SHA}
-#          tags:
-#            - ${{ ECR_REGISTRY }}/${{ ECR_REPOSITORY }}:${{ IMAGE_TAG }}
-
-# TODO
-#   Create the image with two tags: one must be associated with github sha
-#   The other one will be "latest" - the one that is use in production
-#   Every time when new "latest" is pushed the previous one detached from "latest" tag,
-#   but keep the "sha" one
-
-# This is temporary workaround until I figure out what I need, then move to the docker/setup-buildx-action@v3
       - id: build-and-push
         name: push image to Amazon ECR
         shell: bash
         env:
-#          ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
-#          ECR_REPOSITORY: ${{ env.ECR_REPO_NAME }}
           IMAGE_NAME: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ env.ECR_REPO_NAME }}
           IMAGE_TAG1: ${{ github.sha }}
           IMAGE_TAG2: latest
         run: |
+          echo "Building the image with the main tag"
           docker build -t "$IMAGE_NAME:$IMAGE_TAG1" --build-arg GITHUB_SHA_ARG=$GITHUB_SHA .
           docker push "$IMAGE_NAME:$IMAGE_TAG1"
           echo "IMAGE $IMAGE_TAG1 is pushed to $IMAGE_NAME"
-          echo "image_tag=$IMAGE_TAG1"
-          echo "full_image=$IMAGE_NAME:$IMAGE_TAG1"
+          echo "Re tagging image to the latest"
           docker tag "$IMAGE_NAME:$IMAGE_TAG1" "$IMAGE_NAME:$IMAGE_TAG2"
           docker push "$IMAGE_NAME:$IMAGE_TAG2"
-          echo "The Latest image pushed to the repository as well"
+          echo "IMAGE $IMAGE_TAG2 is pushed to $IMAGE_NAME"
