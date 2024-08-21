@@ -31,4 +31,11 @@ Follow [these](docs/AWS-ECR-setup.md) instructions to create a repository for im
 ## ECR polices 
 + https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-policy-examples.html
 
+## ECS
++ https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html
+
+## AWS Copilot
++ https://aws.github.io/copilot-cli/docs/overview/
++ 
+
 
