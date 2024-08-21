@@ -1,14 +1,19 @@
 # Deployment Template 1
 
 This is my personal template for code deployment. Not all 
-services needs to run like this, but I find it handy for 
+services need to run like this, but I find it handy for 
 certain situations.
 
-# Environment variables that needs to be defined in the GitHub
+# Environment variables that are required to be defined in the GitHub
 
 ## Add these to the repository secrets
 + __AWS_ACCOUNT_ID__: example: 123456789000 
 + __GHA_ASSUMED_ROLE__: example: arn:aws:iam::******:role/RoleName
+
+# What to set up in ECR
+
+Follow [these](docs/AWS-ECR-setup.md) instructions to create a repository for images in ECR.
+
 
 # Resources
 
