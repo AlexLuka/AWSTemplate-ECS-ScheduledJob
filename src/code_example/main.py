@@ -1,3 +1,4 @@
+import os
 import sys
 import logging
 
@@ -21,6 +22,8 @@ def init_logger(source, level=logging.DEBUG):
 def main():
     logger = init_logger(__name__, level=logging.DEBUG)
     logger.info(f"Starting the main application")
+    logger.info(f"Code version: https://github.com/AlexLuka/AWSTemplate-ECS-ScheduledJob/tree/"
+                f"{os.environ.get('GITHUB_SHA', 'GITHUB_SHA_NOT_FOUND')}")
 
     n = 0
     n_max = 60
