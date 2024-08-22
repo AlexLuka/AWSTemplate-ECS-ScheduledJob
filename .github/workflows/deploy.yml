@@ -1,0 +1,86 @@
+name: Deployment
+
+on:
+  push:
+    branches: [main]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPO_NAME: templates-scheduled-job
+
+permissions:
+      id-token: write
+      contents: read
+
+jobs:
+  build:
+    name: "Build docker image"
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout
+        name: Checkout
+        uses: actions/checkout@v3
+
+      - id: temporary
+        name: Print some variables
+        run: |
+          echo ${GITHUB_SHA}
+          echo ${GITHUB_REF}
+
+      - id: aws-configure
+        name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.GHA_ASSUMED_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - id: login-ecr
+        name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - id: build-and-push
+        name: push image to Amazon ECR
+        shell: bash
+        env:
+          IMAGE_NAME: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ env.ECR_REPO_NAME }}
+          IMAGE_TAG1: ${{ github.sha }}
+          IMAGE_TAG2: latest
+        run: |
+          echo "Building the image with the main tag"
+          docker build -t "$IMAGE_NAME:$IMAGE_TAG1" --build-arg GITHUB_SHA_ARG=$GITHUB_SHA .
+          docker push "$IMAGE_NAME:$IMAGE_TAG1"
+          echo "IMAGE $IMAGE_TAG1 is pushed to $IMAGE_NAME"
+          echo "Re tagging image to the latest"
+          docker tag "$IMAGE_NAME:$IMAGE_TAG1" "$IMAGE_NAME:$IMAGE_TAG2"
+          docker push "$IMAGE_NAME:$IMAGE_TAG2"
+          echo "IMAGE $IMAGE_TAG2 is pushed to $IMAGE_NAME"
+
+      # Even if you run
+      #   echo $AWS_ACCOUNT_ID
+      # it is going to be masked in the workflow logs, which is great!
+      - id: update-deployment-with-copilot
+        name: Updating deployment with copilot
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          echo "Account ID: $AWS_ACCOUNT_ID"
+
+      - id: aws-copilot-install
+        name: Install copilot to the runner
+        uses: ksivamuthu/aws-copilot-github-action@v0.0.8
+        with:
+          command: install
+          version: v1.34.0
+
+      # Is this step really required?
+      # So, probably not, because our goal is not to update the infrastructure, but update the image
+      # we run on it. And the image always tagged as 'latest'. So, the infra will pull the latest
+      # image always. This script's goal is to update the docker image, not the infra. To update the
+      # infrastructure, we are going to use a different account other than GitHubActions one.
+      - id: aws-copilot-deploy
+        name: Testing if AWS Copilot was installed successfully and updating deployment
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          copilot --version
+          copilot deploy
