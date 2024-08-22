@@ -2,7 +2,7 @@ name: Deployment
 
 on:
   push:
-    branches: [dev, main]
+    branches: [main]
 
 env:
   AWS_REGION: us-east-1
@@ -72,6 +72,11 @@ jobs:
           command: install
           version: v1.34.0
 
+      # Is this step really required?
+      # So, probably not, because our goal is not to update the infrastructure, but update the image
+      # we run on it. And the image always tagged as 'latest'. So, the infra will pull the latest
+      # image always. This script's goal is to update the docker image, not the infra. To update the
+      # infrastructure, we are going to use a different account other than GitHubActions one.
       - id: aws-copilot-deploy
         name: Testing if AWS Copilot was installed successfully and updating deployment
         env:
