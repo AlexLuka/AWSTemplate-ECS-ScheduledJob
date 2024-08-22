@@ -14,6 +14,31 @@ certain situations.
 
 Follow [these](docs/AWS-ECR-setup.md) instructions to create a repository for images in ECR.
 
+# Create an app using AWS Copilot
+
+```shell
+$ copilot app init
+```
+
+```shell
+$ copilot init
+```
+
+```shell
+$ copilot job run
+```
+
+Run the following command after making changes in a manifest file
+```shell
+$ copilot deploy
+```
+
+# TODO
+
++ When creating a job using copilot I use special IAM user created for that. 
+  But that user has more privileges than it should. 
+  The next step is to reduce user's privileges to only
+  those that are necessary to create an infrastructure.
 
 # Resources
 
