@@ -65,14 +65,15 @@ jobs:
         run: |
           echo "Account ID: $AWS_ACCOUNT_ID"
 
-      - id: install-copilot
+      - id: aws-copilot-install
         name: Install copilot to the runner
         uses: ksivamuthu/aws-copilot-github-action@v0.0.8
         with:
           command: install
           version: v1.34.0
 
-      - id: test-colpilot
-        name: Testing if AWS Copilot was installed successfully
+      - id: aws-copilot-deploy
+        name: Testing if AWS Copilot was installed successfully and updating deployment
         run: |
           copilot --version
+          copilot deploy
