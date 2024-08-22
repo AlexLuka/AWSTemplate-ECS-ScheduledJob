@@ -74,6 +74,8 @@ jobs:
 
       - id: aws-copilot-deploy
         name: Testing if AWS Copilot was installed successfully and updating deployment
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
         run: |
           copilot --version
           copilot deploy
