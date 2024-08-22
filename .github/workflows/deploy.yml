@@ -54,3 +54,10 @@ jobs:
           docker tag "$IMAGE_NAME:$IMAGE_TAG1" "$IMAGE_NAME:$IMAGE_TAG2"
           docker push "$IMAGE_NAME:$IMAGE_TAG2"
           echo "IMAGE $IMAGE_TAG2 is pushed to $IMAGE_NAME"
+
+      - id: update-deployment-with-copilot
+        name: Updating deployment with copilot
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          echo "Account ID: $AWS_ACCOUNT_ID"
