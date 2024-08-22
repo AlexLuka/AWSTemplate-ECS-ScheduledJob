@@ -55,6 +55,9 @@ jobs:
           docker push "$IMAGE_NAME:$IMAGE_TAG2"
           echo "IMAGE $IMAGE_TAG2 is pushed to $IMAGE_NAME"
 
+      # Even if you run
+      #   echo $AWS_ACCOUNT_ID
+      # it is going to be masked in the workflow logs, which is great!
       - id: update-deployment-with-copilot
         name: Updating deployment with copilot
         env:
